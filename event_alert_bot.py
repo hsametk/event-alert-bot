@@ -88,7 +88,7 @@ def check_new_events():
         name = event.get("name", "").lower()
         event_id = event.get("id")
 
-        if event_id not in known_event_ids and any(re.search(rf"\b{re.escape(keyword)}\b", name) for keyword in keywords):
+        if event_id not in known_event_ids and any(re.search(rf"\\b{re.escape(keyword)}\\b", name) for keyword in keywords):
             known_event_ids.add(event_id)
             print(f"[+] Yeni event bulundu: {event['name']}")
             send_spam_message(event['name'], event_id, repeat=20, interval=15)  # 5'lik gruplarla mesaj
