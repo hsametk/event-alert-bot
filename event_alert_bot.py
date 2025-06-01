@@ -1,6 +1,7 @@
 import requests
 import time
 import os
+import re
 from dotenv import load_dotenv
 
 # === .env dosyasını yükle ===
@@ -70,7 +71,9 @@ def send_spam_message(event_name, event_id, repeat=20, interval=15):
 def load_keywords():
     try:
         with open(KEYWORDS_FILE, "r") as file:
-            return [line.strip().lower() for line in file if line.strip()]
+            keywords = [line.strip().lower() for line in file if line.strip()]
+            print(f"[KEYWORDS] Anahtar kelimeler: {keywords}")
+            return keywords
     except FileNotFoundError:
         print(f"[!] {KEYWORDS_FILE} bulunamadı. Anahtar kelime listesi boş.")
         return []
@@ -85,7 +88,7 @@ def check_new_events():
         name = event.get("name", "").lower()
         event_id = event.get("id")
 
-        if event_id not in known_event_ids and any(keyword in name for keyword in keywords):
+        if event_id not in known_event_ids and any(re.search(rf"\b{re.escape(keyword)}\b", name) for keyword in keywords):
             known_event_ids.add(event_id)
             print(f"[+] Yeni event bulundu: {event['name']}")
             send_spam_message(event['name'], event_id, repeat=20, interval=15)  # 5'lik gruplarla mesaj
